@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Admin/Desktop/ARTEM/2 СЕМЕСТР/Лыгина. Документация/**)",
+      "Bash(python -c ' *)",
+      "Bash(python -m pip install PyQt6)"
+    ]
+  }
+}
