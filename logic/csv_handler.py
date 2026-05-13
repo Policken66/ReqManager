@@ -18,7 +18,7 @@ def export_to_csv(project_id: int, filters: dict = None) -> str:
     parent_map = {r['id']: r['display_id'] for r in reqs}
 
     output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=CSV_COLUMNS, lineterminator='\n')
+    writer = csv.DictWriter(output, fieldnames=CSV_COLUMNS, delimiter=';', lineterminator='\r\n')
     writer.writeheader()
 
     for r in reqs:
@@ -43,7 +43,7 @@ def export_to_csv(project_id: int, filters: dict = None) -> str:
 
 
 def import_from_csv(project_id: int, csv_content: str, author_id: int) -> dict:
-    reader = csv.DictReader(io.StringIO(csv_content))
+    reader = csv.DictReader(io.StringIO(csv_content), delimiter=';')
     errors = []
     created = 0
     skipped = 0

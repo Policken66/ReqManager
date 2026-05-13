@@ -70,6 +70,10 @@ class RequirementDialog(QDialog):
         self.cb_source.addItems(REQ_SOURCES)
         form.addRow("Источник", self.cb_source)
 
+        self.cb_status = QComboBox()
+        self.cb_status.addItems(REQ_STATUSES)
+        form.addRow("Статус", self.cb_status)
+
         layout.addLayout(form)
 
         # Buttons
@@ -93,6 +97,7 @@ class RequirementDialog(QDialog):
         self.cb_type.setCurrentText(r['type'])
         self.cb_priority.setCurrentText(r['priority'])
         self.cb_source.setCurrentText(r['source'] or '')
+        self.cb_status.setCurrentText(r['status'])
 
     def _inherit_from_parent(self):
         parent = db.get_requirement(self.parent_req_id)
@@ -111,11 +116,16 @@ class RequirementDialog(QDialog):
         req_type = self.cb_type.currentText()
         priority = self.cb_priority.currentText()
         source = self.cb_source.currentText()
+        status = self.cb_status.currentText()
 
         if self.req_id:
             db.update_requirement(
                 self.req_id, title, desc, req_type, priority, source, user['id']
             )
+            # Change status separately so history is logged correctly
+            current_req = db.get_requirement(self.req_id)
+            if current_req and current_req['status'] != status:
+                db.change_requirement_status(self.req_id, status, user['id'])
         else:
             # Check parent nesting level
             if self.parent_req_id:

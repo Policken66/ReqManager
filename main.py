@@ -1,4 +1,5 @@
 import sys
+import os
 from PyQt6.QtWidgets import QApplication, QStackedWidget
 from PyQt6.QtCore import Qt
 
@@ -8,10 +9,14 @@ from ui.login_window import LoginWindow
 from ui.main_window import MainWindow
 from ui.app_icon import make_icon
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 def main():
     app = QApplication(sys.argv)
-    app.setStyleSheet(APP_STYLE)
+    arrow_path = os.path.join(BASE_DIR, 'ui', 'icons', 'arrow_down.svg').replace('\\', '/')
+    style = APP_STYLE.replace('ARROW_PATH_PLACEHOLDER', arrow_path)
+    app.setStyleSheet(style)
     app.setApplicationName("До-документация")
     app.setOrganizationName("NSTU")
 

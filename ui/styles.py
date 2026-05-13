@@ -134,16 +134,17 @@ QLineEdit:focus, QTextEdit:focus, QComboBox:focus, QDateEdit:focus {
 }
 
 QComboBox::drop-down {
-    border: none;
-    width: 24px;
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border-left: 1px solid #CBD5E0;
+    background: transparent;
 }
 
 QComboBox::down-arrow {
-    image: none;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 6px solid #718096;
-    margin-right: 6px;
+    image: url(ARROW_PATH_PLACEHOLDER);
+    width: 10px;
+    height: 6px;
 }
 
 QComboBox QAbstractItemView {

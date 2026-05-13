@@ -6,10 +6,25 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 from db import database as db
-from logic.auth import current_user, can_edit, can_review, get_allowed_transitions
+from logic.auth import current_user, can_edit, get_allowed_transitions, STATUS_ORDER
 from ui.styles import STATUS_COLORS, PRIORITY_COLORS
 from ui.dialogs.requirement_dialog import RequirementDialog
-from ui.dialogs.review_dialog import ReviewDialog
+
+_BTN_SUCCESS = (
+    "QPushButton { background-color: #48BB78; color: #ffffff; border: none; "
+    "padding: 7px 16px; border-radius: 6px; font-weight: 500; font-size: 13px; }"
+    "QPushButton:hover { background-color: #38A169; }"
+)
+_BTN_DANGER = (
+    "QPushButton { background-color: #FC8181; color: #ffffff; border: none; "
+    "padding: 7px 16px; border-radius: 6px; font-weight: 500; font-size: 13px; }"
+    "QPushButton:hover { background-color: #F56565; }"
+)
+_BTN_SECONDARY = (
+    "QPushButton { background-color: #EDF2F7; color: #4A5568; "
+    "border: 1px solid #CBD5E0; padding: 7px 16px; border-radius: 6px; font-weight: 500; font-size: 13px; }"
+    "QPushButton:hover { background-color: #E2E8F0; }"
+)
 
 
 class RequirementCard(QDialog):
@@ -71,7 +86,8 @@ class RequirementCard(QDialog):
 
         # Body
         body = QWidget()
-        body.setStyleSheet("background: #F5F6FA;")
+        body.setObjectName("req_card_body")
+        body.setStyleSheet("#req_card_body { background: #F5F6FA; }")
         body_layout = QVBoxLayout(body)
         body_layout.setContentsMargins(20, 12, 20, 12)
         body_layout.setSpacing(10)
@@ -154,32 +170,33 @@ class RequirementCard(QDialog):
                 item.widget().deleteLater()
 
         edit_ok = can_edit(req['project_id'])
-        review_ok = can_review(req['project_id'], req['author_id'])
         allowed = get_allowed_transitions(req['status'])
 
         if edit_ok:
             btn_edit = QPushButton("Редактировать")
-            btn_edit.setObjectName("btn_secondary")
+            btn_edit.setStyleSheet(_BTN_SECONDARY)
             btn_edit.clicked.connect(self._edit)
             self.actions_row.addWidget(btn_edit)
 
-        if req['status'] == 'на рассмотрении' and review_ok:
-            btn_review = QPushButton("Рецензировать")
-            btn_review.clicked.connect(self._review)
-            self.actions_row.addWidget(btn_review)
-
         if edit_ok and allowed:
-            for new_status in allowed:
-                if new_status == 'черновик':
-                    continue  # handled by review only
-                btn = QPushButton(f"→ {new_status.capitalize()}")
-                btn.setObjectName("btn_success" if new_status in ('утверждено', 'реализовано', 'проверено') else "btn_secondary")
+            cur_idx = STATUS_ORDER.index(req['status']) if req['status'] in STATUS_ORDER else -1
+            # Sort: backward (red) first, forward (green) second
+            sorted_transitions = sorted(
+                allowed,
+                key=lambda s: STATUS_ORDER.index(s) if s in STATUS_ORDER else cur_idx,
+            )
+            for new_status in sorted_transitions:
+                new_idx = STATUS_ORDER.index(new_status) if new_status in STATUS_ORDER else cur_idx
+                is_forward = new_idx > cur_idx
+                label = f"→ {new_status.capitalize()}" if is_forward else f"← {new_status.capitalize()}"
+                btn = QPushButton(label)
+                btn.setStyleSheet(_BTN_SUCCESS if is_forward else _BTN_DANGER)
                 btn.clicked.connect(lambda _, s=new_status: self._change_status(s))
                 self.actions_row.addWidget(btn)
 
         if edit_ok and req['status'] == 'черновик':
             btn_sub = QPushButton("+ Подтребование")
-            btn_sub.setObjectName("btn_secondary")
+            btn_sub.setStyleSheet(_BTN_SECONDARY)
             btn_sub.clicked.connect(self._add_sub)
             self.actions_row.addWidget(btn_sub)
 
@@ -187,7 +204,7 @@ class RequirementCard(QDialog):
 
         if edit_ok:
             btn_del = QPushButton("Удалить")
-            btn_del.setObjectName("btn_danger")
+            btn_del.setStyleSheet(_BTN_DANGER)
             btn_del.clicked.connect(self._delete)
             self.actions_row.addWidget(btn_del)
 
@@ -371,12 +388,6 @@ class RequirementCard(QDialog):
         dlg.requirement_changed.connect(self._load)
         dlg.exec()
         self.requirement_changed.emit()
-
-    def _review(self):
-        dlg = ReviewDialog(self, req_id=self.req_id)
-        if dlg.exec():
-            self._load()
-            self.requirement_changed.emit()
 
     def _change_status(self, new_status):
         req = db.get_requirement(self.req_id)

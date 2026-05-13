@@ -38,17 +38,20 @@ class RequirementsPanel(QWidget):
 
         self.cb_type = QComboBox()
         self.cb_type.addItem("Все типы", "")
-        self.cb_type.addItems(['бизнес', 'пользовательское', 'функциональное', 'нефункциональное'])
+        for v in ['бизнес', 'пользовательское', 'функциональное', 'нефункциональное']:
+            self.cb_type.addItem(v, v)
         self.cb_type.currentIndexChanged.connect(self._apply_filters)
 
         self.cb_status = QComboBox()
         self.cb_status.addItem("Все статусы", "")
-        self.cb_status.addItems(['черновик', 'на рассмотрении', 'утверждено', 'реализовано', 'проверено'])
+        for v in ['черновик', 'на рассмотрении', 'утверждено', 'реализовано', 'проверено']:
+            self.cb_status.addItem(v, v)
         self.cb_status.currentIndexChanged.connect(self._apply_filters)
 
         self.cb_priority = QComboBox()
         self.cb_priority.addItem("Все приоритеты", "")
-        self.cb_priority.addItems(['высокий', 'средний', 'низкий'])
+        for v in ['высокий', 'средний', 'низкий']:
+            self.cb_priority.addItem(v, v)
         self.cb_priority.currentIndexChanged.connect(self._apply_filters)
 
         self.btn_new = QPushButton("+ Требование")

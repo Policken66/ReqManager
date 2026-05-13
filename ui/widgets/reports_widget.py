@@ -133,15 +133,11 @@ class ReportsWidget(QWidget):
             'черновик': '#718096', 'на рассмотрении': '#D69E2E',
             'утверждено': '#38A169', 'реализовано': '#3B82F6', 'проверено': '#805AD5'
         }
-        # Use a card-per-status layout for perfect alignment
-        h_layout = QHBoxLayout()
-        h_layout.setSpacing(8)
-        for status, count in by_status.items():
+        for col, (status, count) in enumerate(by_status.items()):
             color = STATUS_COLORS_MAP.get(status, '#4A5568')
             card = QFrame()
             card.setStyleSheet(
-                f"QFrame {{ border: 1px solid {color}; border-radius: 8px; "
-                f"background: white; padding: 4px; }}"
+                f"QFrame {{ border: 2px solid {color}; border-radius: 8px; background: white; }}"
             )
             cv = QVBoxLayout(card)
             cv.setContentsMargins(10, 8, 10, 8)
@@ -155,9 +151,7 @@ class ReportsWidget(QWidget):
             lbl_s.setWordWrap(True)
             cv.addWidget(lbl_n)
             cv.addWidget(lbl_s)
-            h_layout.addWidget(card)
-        h_layout.addStretch()
-        self.status_layout.addLayout(h_layout, 0, 0)
+            self.status_layout.addWidget(card, 0, col)
 
     def _show_type_breakdown(self, by_type):
         row = 0
@@ -244,3 +238,5 @@ def _clear_grid(layout):
         item = layout.takeAt(0)
         if item.widget():
             item.widget().deleteLater()
+        elif item.layout():
+            _clear_grid(item.layout())

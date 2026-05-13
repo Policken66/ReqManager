@@ -7,15 +7,20 @@ EDITOR_ROLES = {'руководитель', 'исполнитель'}
 # Roles that can review (but not own requirements)
 REVIEWER_ROLES = {'руководитель', 'исполнитель'}
 # All valid roles
-ALL_ROLES = ['руководитель', 'исполнитель', 'наблюдатель', 'разработчик', 'тестировщик']
+ALL_ROLES = ['руководитель', 'исполнитель', 'наблюдатель']
+
+# Status order (for determining forward/backward direction)
+STATUS_ORDER = ['черновик', 'на рассмотрении', 'утверждено', 'реализовано', 'проверено']
 
 # Valid status transitions
+# Forward (green button): higher index in STATUS_ORDER
+# Backward (red button): lower index in STATUS_ORDER
 STATUS_TRANSITIONS = {
     'черновик': ['на рассмотрении'],
     'на рассмотрении': ['утверждено', 'черновик'],
-    'утверждено': ['реализовано'],
-    'реализовано': ['проверено'],
-    'проверено': [],
+    'утверждено': ['реализовано', 'на рассмотрении'],
+    'реализовано': ['проверено', 'утверждено'],
+    'проверено': ['на рассмотрении'],
 }
 
 _session: dict = {}

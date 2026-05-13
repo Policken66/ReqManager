@@ -55,7 +55,7 @@ def seed():
         conn.commit()
 
     # Members for p1
-    for uid, role in [(u_ivanova, 'исполнитель'), (u_petrov, 'разработчик'), (u_sidorova, 'тестировщик')]:
+    for uid, role in [(u_ivanova, 'исполнитель'), (u_petrov, 'исполнитель'), (u_sidorova, 'наблюдатель')]:
         conn.execute(
             "INSERT OR IGNORE INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)",
             (p1, uid, role)
@@ -80,7 +80,7 @@ def seed():
         )
         conn.commit()
 
-    for uid, role in [(u_admin, 'исполнитель'), (u_petrov, 'разработчик')]:
+    for uid, role in [(u_admin, 'исполнитель'), (u_petrov, 'исполнитель')]:
         conn.execute(
             "INSERT OR IGNORE INTO project_members (project_id, user_id, role) VALUES (?, ?, ?)",
             (p2, uid, role)
@@ -266,8 +266,8 @@ def seed():
     print("Тестовые аккаунты:")
     print("  admin@reqmanager.ru / admin123  (руководитель)")
     print("  ivanova@reqmanager.ru / pass123 (исполнитель)")
-    print("  petrov@reqmanager.ru / pass123  (разработчик)")
-    print("  sidorova@reqmanager.ru / pass123 (тестировщик)")
+    print("  petrov@reqmanager.ru / pass123  (исполнитель)")
+    print("  sidorova@reqmanager.ru / pass123 (наблюдатель)")
 
 
 if __name__ == '__main__':

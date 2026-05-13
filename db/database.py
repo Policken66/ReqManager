@@ -187,6 +187,15 @@ def update_project(project_id, name, description, status, start_date, end_date):
         conn.close()
 
 
+def delete_project(project_id: int):
+    conn = get_connection()
+    try:
+        conn.execute("DELETE FROM projects WHERE id=?", (project_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_project(project_id: int):
     conn = get_connection()
     try:

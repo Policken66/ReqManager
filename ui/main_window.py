@@ -77,7 +77,8 @@ class MainWindow(QMainWindow):
         btn_new_proj.setFixedSize(24, 24)
         btn_new_proj.setToolTip("Создать проект")
         btn_new_proj.setStyleSheet(
-            "QPushButton { background: #2D3F55; color: #63B3ED; border-radius: 4px; font-weight: bold; }"
+            "QPushButton { background: #2D3F55; color: #63B3ED; border-radius: 4px; "
+            "font-weight: bold; padding: 0px; font-size: 16px; text-align: center; }"
             "QPushButton:hover { background: #3A5068; }"
         )
         btn_new_proj.clicked.connect(self._new_project)
@@ -107,6 +108,17 @@ class MainWindow(QMainWindow):
         self.btn_members.setEnabled(False)
         sidebar_layout.addWidget(self.btn_members)
 
+        self.btn_delete_proj = QPushButton("Удалить проект")
+        self.btn_delete_proj.setStyleSheet(
+            "QPushButton { background: #2D3F55; color: #FC8181; border: none; "
+            "padding: 8px; border-radius: 6px; text-align: left; }"
+            "QPushButton:hover { background: #3A2020; }"
+            "QPushButton:disabled { color: #4A5568; }"
+        )
+        self.btn_delete_proj.clicked.connect(self._delete_project)
+        self.btn_delete_proj.setEnabled(False)
+        sidebar_layout.addWidget(self.btn_delete_proj)
+
         separator2 = QFrame()
         separator2.setFrameShape(QFrame.Shape.HLine)
         separator2.setStyleSheet("border: 1px solid #2D3F55;")
@@ -130,7 +142,8 @@ class MainWindow(QMainWindow):
 
         # ── Main area ──────────────────────────────────────────────────────
         right_area = QWidget()
-        right_area.setStyleSheet("background: #F5F6FA;")
+        right_area.setObjectName("main_right_area")
+        right_area.setStyleSheet("#main_right_area { background: #F5F6FA; }")
         right_layout = QVBoxLayout(right_area)
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(0)
@@ -213,6 +226,7 @@ class MainWindow(QMainWindow):
 
         self.btn_edit_proj.setEnabled(can_edit(project_id))
         self.btn_members.setEnabled(True)
+        self.btn_delete_proj.setEnabled(role == 'руководитель')
 
         self.req_panel.set_project(project_id)
         self.activity_widget.set_project(project_id)
@@ -236,6 +250,31 @@ class MainWindow(QMainWindow):
                 if item.data(Qt.ItemDataRole.UserRole) == self.current_project_id:
                     self.project_list.setCurrentItem(item)
                     break
+
+    def _delete_project(self):
+        if not self.current_project_id:
+            return
+        project = db.get_project(self.current_project_id)
+        reply = QMessageBox.question(
+            self, "Удаление проекта",
+            f"Удалить проект «{project['name']}»?\n\n"
+            "Будут удалены все требования, комментарии и история изменений.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        db.delete_project(self.current_project_id)
+        self.current_project_id = None
+        self.lbl_project_name.setText("Выберите проект")
+        self.lbl_project_meta.setText("")
+        self.btn_edit_proj.setEnabled(False)
+        self.btn_members.setEnabled(False)
+        self.btn_delete_proj.setEnabled(False)
+        self.req_panel.set_project(None)
+        self.activity_widget.set_project(None)
+        self.reports_widget.set_project(None)
+        self._load_projects()
 
     def _manage_members(self):
         if not self.current_project_id:
